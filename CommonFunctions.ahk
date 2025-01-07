@@ -103,3 +103,11 @@ ExecuteCommandPromptCommand(Command, ClipboardTimeout := 5, Minimized := true)
 		return Output
 	}
 }
+
+ActivateWindowOrRun(WindowName, RunCmd, RunWorkingDir := "", RunOptions := "")
+{
+	If (WinExist(WindowName))
+		WinActivate
+	Else
+		Run(RunCmd, RunWorkingDir, RunOptions)
+}
