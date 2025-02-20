@@ -1,4 +1,4 @@
-; #################################################################################################################################################################################
+﻿; #################################################################################################################################################################################
 ; GUI2 Class
 ; #################################################################################################################################################################################
 class Gui2 extends Gui {
@@ -78,7 +78,10 @@ GuiCreateTopMenu()
 	
 	GGui.GetClientPos(&DummyX, &DummyY, &W, &H)
 	TopGuiHeight := 34
-	GGuiElems["TopMenuGui"].Show("X0 Y0 W" W " H" TopGuiHeight)
+	if (GGuiConfig["ShowTopBar"])
+	{
+		GGuiElems["TopMenuGui"].Show("X0 Y0 W" W " H" TopGuiHeight)
+	}
 
 	; Create profiles DDL and select the first one ifavailable, if not disable it.
 	ProfileNames := GetProfileNameList()
@@ -95,7 +98,12 @@ GuiCreateTopMenu()
 
 ResizeTopMenu()
 {
-	global Logger, GGui, GGuiElems
+	global Logger, GGui, GGuiElems, GGuiConfig
+
+	if (!GGuiConfig["ShowTopBar"])
+	{
+		return
+	}
 
 	; Grab client window size
 	GGui.GetClientPos(&DummyX, &DummyY, &W, &H)
@@ -108,15 +116,15 @@ GuiDestroyDeckGui()
 	global Logger, GGuiElems, GMaxRows, GMaxCols
 
 	; Clear old deck buttons refs
-	if(GGuiElems.Has("DeckGuiButtons"))
+	if (GGuiElems.Has("DeckGuiButtons"))
 	{
 		i := 0
 		j := 0
-		while(i < GMaxRows)
+		while (i < GMaxRows)
 		{
-			while(j < GMaxCols)
+			while (j < GMaxCols)
 			{
-				if(GGuiElems["DeckGuiButtons"].Has("X" i "J" j) && GGuiElems["DeckGuiButtons"]["X" i "J" j].Has("Gui"))
+				if (GGuiElems["DeckGuiButtons"].Has("X" i "J" j) && GGuiElems["DeckGuiButtons"]["X" i "J" j].Has("Gui"))
 				{
 					GGuiElems["DeckGuiButtons"]["X" i "J" j]["Gui"].Destroy()
 					GGuiElems["DeckGuiButtons"].Delete("X" i "J" j)
@@ -128,13 +136,13 @@ GuiDestroyDeckGui()
 		GGuiElems.Delete("DeckGuiButtons")
 	}
 
-	if(GGuiElems.Has("DeckGuiCentered"))
+	if (GGuiElems.Has("DeckGuiCentered"))
 	{
 		GGuiElems["DeckGuiCentered"].Destroy()
 		GGuiElems.Delete("DeckGuiCentered")
 	}
 
-	if(GGuiElems.Has("DeckGui"))
+	if (GGuiElems.Has("DeckGui"))
 	{
 		GGuiElems["DeckGui"].Destroy()
 		GGuiElems.Delete("DeckGui")
@@ -150,20 +158,30 @@ GuiCreateDeckGui()
 	GGuiElems["DeckGui"] := Gui("+AlwaysOnTop -Caption +ToolWindow +Parent" GGui.Hwnd, "ScreenDeckButtons")
 	GGuiElems["DeckGui"].BackColor := GetCurrentDeckColor()
 	
-	GGuiElems["TopSeparator"].GetPos(&DummyX, &TopCtrlY, &CtrlW, &DummyH)
 	GGui.GetClientPos(&DummyX, &DummyY, &W, &H)
+	DeckHeight := H
+	Y := 0
+	
+	if (GGuiConfig["ShowTopBar"])
+	{
+		GGuiElems["TopSeparator"].GetPos(&DummyX, &TopCtrlY, &CtrlW, &DummyH)
+		DeckHeight := H - TopCtrlY
+		Y := TopCtrlY
+	}
 
-	DeckHeight := H - TopCtrlY
-	GGuiElems["DeckGui"].Show("X0 Y" TopCtrlY " W" CtrlW " H" DeckHeight)
+	GGuiElems["DeckGui"].Show("X0 Y" Y " W" W " H" DeckHeight)
 
-	RowsNoClamp := Integer(DeckHeight / (GGuiConfig["DeckButtonSize"] + GGuiConfig["DeckButtonMargin"]))
-	ColsNoClamp := Integer(CtrlW / (GGuiConfig["DeckButtonSize"] + GGuiConfig["DeckButtonMargin"]))
+	DeckBtnSize := GetCurrentDeckButtonSize()
+	DeckBtnMargin := GetCurrentDeckButtonMargin()
+	DeckBtnAndMargin := DeckBtnSize + DeckBtnMargin
+	RowsNoClamp := Integer(DeckHeight / (DeckBtnAndMargin))
+	ColsNoClamp := Integer(W / (DeckBtnAndMargin))
 	GGeneratedConfig["Rows"] := Clamp(RowsNoClamp, 0, GMaxRows)
 	GGeneratedConfig["Cols"] := Clamp(ColsNoClamp, 0, GMaxCols)
 
 	GGuiElems["DeckGuiCentered"] := Gui("+AlwaysOnTop -Caption +ToolWindow +Parent" GGuiElems["DeckGui"].Hwnd, "ScreenDeckButtonsCentered")
 	GGuiElems["DeckGuiCentered"].BackColor := GetCurrentDeckColor()
-	GGuiElems["DeckGuiCentered"].Show("W" GGeneratedConfig["Cols"] * (GGuiConfig["DeckButtonSize"] + GGuiConfig["DeckButtonMargin"]) " H" GGeneratedConfig["Rows"] * (GGuiConfig["DeckButtonSize"] + GGuiConfig["DeckButtonMargin"]))
+	GGuiElems["DeckGuiCentered"].Show("W" GGeneratedConfig["Cols"] * DeckBtnAndMargin " H" GGeneratedConfig["Rows"] * DeckBtnAndMargin)
 
 	GuiCreateDeckButtons()
 }
@@ -194,7 +212,9 @@ GuiCreateDeckButton(Row, Col)
 {
 	global Logger, GGuiElems, GGuiConfig, GGeneratedConfig
 	
-	BtnAndMargin := GGuiConfig["DeckButtonSize"] + GGuiConfig["DeckButtonMargin"]
+	DeckBtnSize := GetCurrentDeckButtonSize()
+	DeckBtnMargin := GetCurrentDeckButtonMargin()
+	BtnAndMargin := DeckBtnSize + DeckBtnMargin
 	GuiX := BtnAndMargin * Col
 	GuiY := BtnAndMargin * Row
 
@@ -204,15 +224,17 @@ GuiCreateDeckButton(Row, Col)
 	DeckButton["Gui"].BackColor := "FFFFFE"
 	WinSetTransColor("FFFFFE 255", "ahk_id " DeckButton["Gui"].Hwnd)
 	
-	BtnStart := GGuiConfig["DeckButtonMargin"] / 2
-	DeckButton["Btn"] := DeckButton["Gui"].AddPicture("x" BtnStart " y" BtnStart " w" GGuiConfig["DeckButtonSize"] " h" GGuiConfig["DeckButtonSize"] " +BackgroundTrans", "HBITMAP:*" GDeckButtonImgHandle)
+	BtnStart := DeckBtnMargin / 2
+	DeckButton["Btn"] := DeckButton["Gui"].AddPicture("x" BtnStart " y" BtnStart " w" DeckBtnSize " h" DeckBtnSize " +BackgroundTrans", "HBITMAP:*" GDeckButtonImgHandle)
 	DeckButton["Btn"].OnEvent("Click", GuiDeckButtonClicked)
+	DeckButton["Btn"].OnEvent("DoubleClick", GuiDeckButtonDoubleClick)
 	
 	DeckButton["Btn"].Row := Row
 	DeckButton["Btn"].Col := Col
 	Idx := Row * GGeneratedConfig["Cols"] + Col
 	DeckButton["Btn"].Idx := Idx
 	DeckButton["Btn"].CustomFunction := ""
+	DeckButton["Btn"].CustomDoubleClickFunction := ""
 	
 	; Creating a second button on top of the first would not work if wanted to be clicked. The first button created, or the one that is drawn first (the one at the back) is the one that receives the click event
 	if (GetCurrentProfileName() != "")
@@ -220,11 +242,17 @@ GuiCreateDeckButton(Row, Col)
 		Json := Map()
 		if (GetCurrentProfileButtonJson(Idx, &Json))
 		{
-			if (Json["Type"] == "Action")
+			if (Json.Has("Action") && Json["Action"] != "")
 			{
 				DeckButton["Btn"].CustomFunction := Json["Action"]
 			}
-			else if (Json["Type"] == "ProfileSwitch")
+
+			if (Json.Has("DoubleClickAction") && Json["DoubleClickAction"] != "")
+			{
+				DeckButton["Btn"].CustomDoubleClickFunction := Json["DoubleClickAction"]
+			}
+			
+			if (Json.Has("Profile") && Json["Profile"] != "")
 			{
 				DeckButton["Btn"].Profile := Json["Profile"]
 			}
@@ -243,7 +271,7 @@ GuiCreateDeckButton(Row, Col)
 				}
 				else
 				{
-					IconSize := GGuiConfig["DeckButtonSize"] * IconScale
+					IconSize := DeckBtnSize * IconScale
 					IconStartX := (BtnAndMargin / 2) - IconSize / 2
 					IconStartY := BtnAndMargin * IconVerticalAlignment - IconSize / 2
 
@@ -399,11 +427,25 @@ GuiDeckButtonClicked(GuiCtrlObj, Info)
 	{
 		%GuiCtrlObj.CustomFunction%()
 	}
-	else if (GuiCtrlObj.HasProp("Profile") && GuiCtrlObj.Profile != "")
+	
+	if (GuiCtrlObj.HasProp("Profile") && GuiCtrlObj.Profile != "")
 	{
 		GGuiElems["TopProfileDropdown"].Text := GuiCtrlObj.Profile
 		GuiProfileSelected(GGuiElems["TopProfileDropdown"], "")
 	}
+}
+
+GuiDeckButtonDoubleClick(GuiCtrlObj, Info)
+{
+	global Logger
+	Logger.Log("GuiDeckButtonDoubleClick")
+
+	if (GuiCtrlObj.HasProp("CustomDoubleClickFunction") && GuiCtrlObj.CustomDoubleClickFunction != "")
+	{
+		%GuiCtrlObj.CustomDoubleClickFunction%()
+	}
+
+	GuiDeckButtonClicked(GuiCtrlObj, Info)
 }
 
 ; #################################################################################################################################################################################
@@ -439,6 +481,44 @@ GetCurrentDeckColor()
 	}
 
 	return Color
+}
+
+GetCurrentDeckButtonSize()
+{
+	global GGuiConfig, GProfiles
+
+	CurrentProfile := GetCurrentProfileName()
+	DeckButtonSize := GGuiConfig.Has("DeckButtonSize") ? GGuiConfig["DeckButtonSize"] : 95
+	if (CurrentProfile == "")
+	{
+		return DeckButtonSize
+	}
+	
+	if (GProfiles.Has(CurrentProfile) && GProfiles[CurrentProfile].Has("DeckButtonSize"))
+	{
+		DeckButtonSize := GProfiles[CurrentProfile]["DeckButtonSize"]
+	}
+
+	return DeckButtonSize
+}
+
+GetCurrentDeckButtonMargin()
+{
+	global GGuiConfig, GProfiles
+
+	CurrentProfile := GetCurrentProfileName()
+	DeckButtonMargin := GGuiConfig.Has("DeckButtonMargin") ? GGuiConfig["DeckButtonMargin"] : 6
+	if (CurrentProfile == "")
+	{
+		return DeckButtonMargin
+	}
+	
+	if (GProfiles.Has(CurrentProfile) && GProfiles[CurrentProfile].Has("DeckButtonMargin"))
+	{
+		DeckButtonMargin := GProfiles[CurrentProfile]["DeckButtonMargin"]
+	}
+
+	return DeckButtonMargin
 }
 
 IsGif(FileName)
