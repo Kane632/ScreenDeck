@@ -1,4 +1,4 @@
-﻿; #######################################################################################################################################################################
+; #######################################################################################################################################################################
 ; Functions
 ; #######################################################################################################################################################################
 
@@ -17,6 +17,7 @@ OnStartFunction()
 	TraySetIcon(A_WorkingDir . "\Images\ScreenDeck.png")
 
 	A_TrayMenu.Add()
+	A_TrayMenu.Add("Reset Window size and cords", ResetWindowSizeAndCords)
 	A_TrayMenu.Add("Reload Without Saving", ReloadWithoutSaveClicked)
 	A_TrayMenu.Add("Exit Without Saving", ExitWithoutSaveClicked)
 	
@@ -35,6 +36,11 @@ ExitWithoutSaveClicked(ItemName, ItemPos, MyMenu)
 	global GExitWithoutSave
 	GExitWithoutSave := true
 	ExitApp()
+}
+
+ResetWindowSizeAndCords(ItemName, ItemPos, MyMenu)
+{
+	ResetGuiToDefaultPosAndSize()
 }
 
 OnExitFunction(ExitReason, ExitCode)
