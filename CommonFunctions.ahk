@@ -111,3 +111,82 @@ ActivateWindowOrRun(WindowName, RunCmd, RunWorkingDir := "", RunOptions := "")
 	Else
 		Run(RunCmd, RunWorkingDir, RunOptions)
 }
+
+ClickWindowRatio(WindowName, RatioX, RatioY, DelayAfter := 0, SimulateMouseMove := false, MouseMoveSpeed := 1, DelayAfterMouseMove := 100)
+{
+	CoordMode("Mouse", "Window")
+	
+	WinGetPos(,, &WinWidth, &WinHeight, WindowName)
+	FinalX := RatioX * WinWidth
+	FinalY := RatioY * WinHeight
+	if (SimulateMouseMove)
+	{
+		MouseMove(FinalX, FinalY, 1)
+		Sleep(DelayAfterMouseMove)
+	}
+
+	ControlClick("x" FinalX " y" FinalY, WindowName,, "LEFT", 1, "NA",,)
+
+	Sleep(DelayAfter)
+	
+	CoordMode("Mouse", "Screen")
+}
+
+ClickAndDragWindowRatio(WindowName, StartRatioX, StartRatioY, EndRatioX, EndRatioY)
+{
+	CoordMode("Mouse", "Window")
+	CurrentMouseSpeed := A_DefaultMouseSpeed
+	SetDefaultMouseSpeed(20)
+
+	WinGetPos(,, &WinWidth, &WinHeight, WindowName)
+	StartX := StartRatioX * WinWidth
+	StartY := StartRatioY * WinHeight
+	EndX := EndRatioX * WinWidth
+	EndY := EndRatioY * WinHeight
+	Send("{Click " . StartX . " " . StartY . " Down}{Click " . EndX . " " . EndY . " Up}")
+	
+	CoordMode("Mouse", "Screen")
+	SetDefaultMouseSpeed(CurrentMouseSpeed)
+}
+
+ClicksRangeWindowRatios(WindowName, StartRatioX, StartRatioY, EndRatioX, EndRatioY, ClicksAmount, ClickDelay := 10, DelayAfter := 0)
+{
+	CoordMode("Mouse", "Window")
+
+	WinGetPos(,, &WinWidth, &WinHeight, WindowName)
+	RatioDiffX := EndRatioX - StartRatioX
+	RatioDiffY := EndRatioY - StartRatioY
+	DeltaPerClickX := RatioDiffX / ClicksAmount
+	DeltaPerClickY := RatioDiffY / ClicksAmount
+	
+	Loop(ClicksAmount)
+	{
+		DeltaRatioX := DeltaPerClickX * (A_Index - 1)
+		DeltaRatioY := DeltaPerClickY * (A_Index - 1)
+
+		FinalX := (StartRatioX + DeltaRatioX) * WinWidth
+		FinalY := (StartRatioY + DeltaRatioY) * WinHeight
+
+		ControlClick("x" FinalX " y" FinalY, WindowName,, "LEFT", 1, "NA",,)
+		Sleep(ClickDelay)
+	}
+
+	Sleep(DelayAfter)
+	
+	CoordMode("Mouse", "Screen")
+}
+
+CopyCurrentWindowCoordsAsRatios()
+{
+	CoordMode("Mouse", "Window")
+
+	Title := WinGetTitle("A")
+	WinGetPos(&OutX, &OutY, &WinWidth, &WinHeight, Title)
+	MouseGetPos(&MouseX, &MouseY)
+	RatioX := MouseX / WinWidth
+	RatioY := MouseY / WinHeight
+	Result := "" . Format("{:.6f}", RatioX) . ", " . Format("{:.6f}", RatioY)
+	A_Clipboard := Result
+	
+	CoordMode("Mouse", "Screen")
+}
