@@ -14,7 +14,7 @@ OnStartFunction()
 
     StartVariables()
 
-	TraySetIcon(A_WorkingDir . "\Images\ScreenDeck.png")
+	TraySetIcon(A_WorkingDir . "\Images\ScreenDeck.ico")
 
 	A_TrayMenu.Add()
 	A_TrayMenu.Add("Reset Window size and cords", ResetWindowSizeAndCords)
