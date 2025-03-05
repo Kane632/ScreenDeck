@@ -154,7 +154,7 @@ SaveJsonConfigFile()
 	global Logger, JsonConfigFilePath, JsonConfig, GGeneratedConfig
 
 	JsonConfig["Generated"] := GGeneratedConfig
-	JsonOutputStr := JSON.stringify(JsonConfig)
+	JsonOutputStr := JSON.stringify(JsonConfig, "`t")
 
 	JsonFile := FileOpen(JsonConfigFilePath, "w")
 	if !IsObject(JsonFile)
