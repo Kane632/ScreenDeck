@@ -32,11 +32,11 @@ CreateGUI()
 	Y := 0
 	W := 1024
 	H := 600
-	if(!LoadGuiJsonSizeAndPos(&X, &Y, &W, &H))
+	if (!LoadGuiJsonSizeAndPos(&X, &Y, &W, &H))
 	{
 		MonitorGetWorkArea(MonitorGetPrimary(), &Left, &Top, &Right, &Bottom)
-		X := (Right - Left) / 2 + Left
-		Y := (Bottom - Top) / 2 + Top
+		X := (Right - Left) / 2 + Left - W / 2
+		Y := (Bottom - Top) / 2 + Top - H / 2
 	}
 
 	GDeckButtonImgHandle := LoadPicture(GImgPath "SquareBtn.png")
@@ -78,7 +78,7 @@ GuiCreateTopMenu()
 	
 	GGui.GetClientPos(&DummyX, &DummyY, &W, &H)
 	TopGuiHeight := 34
-	if (GGuiConfig["ShowTopBar"])
+	if (GGuiConfig.Has("ShowTopBar") && GGuiConfig["ShowTopBar"])
 	{
 		GGuiElems["TopMenuGui"].Show("X0 Y0 W" W " H" TopGuiHeight)
 	}
@@ -100,7 +100,7 @@ ResizeTopMenu()
 {
 	global Logger, GGui, GGuiElems, GGuiConfig
 
-	if (!GGuiConfig["ShowTopBar"])
+	if (!GGuiConfig.Has("ShowTopBar") || !GGuiConfig["ShowTopBar"])
 	{
 		return
 	}
@@ -162,7 +162,7 @@ GuiCreateDeckGui()
 	DeckHeight := H
 	Y := 0
 	
-	if (GGuiConfig["ShowTopBar"])
+	if (GGuiConfig.Has("ShowTopBar") && GGuiConfig["ShowTopBar"])
 	{
 		GGuiElems["TopSeparator"].GetPos(&DummyX, &TopCtrlY, &CtrlW, &DummyH)
 		DeckHeight := H - TopCtrlY
