@@ -1,5 +1,9 @@
 Logs
-CustomImages
-CustomFunctions.ahk
-ScreenDeck.json
-*.psd
+
+# I recommend putting all your custom images inside the CustomImages folder and adding it to the gitignore.
+#CustomImages
+#*.psd
+
+#If you want you can also ignore your json file or your CustomFunctions file.
+#ScreenDeck.json
+#CustomFunctions.ahk
