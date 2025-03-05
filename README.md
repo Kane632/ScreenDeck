@@ -1,5 +1,5 @@
 # Project description
-![](.\Docs\Images\Example.png)
+![](./Docs/Images/Example.png)
 Have you always wanted to have a customizable Stream Deck like experience and with more flexibility?  
 
 Grab yourself any touch screen [like this one](https://www.amazon.es/dp/B098762GVK?ref=nb_sb_ss_w_as-reorder_k1_1_11&amp=&crid=2DWMQKM8WM8E5&amp=&sprefix=touch+scree) and plug it into your pc and go crazy customizing as many profiles as you want with different icons, texts, colors and more!  
@@ -32,13 +32,13 @@ The problem is that when touching the screen your cursor will be moved and click
 The solution is the following:  
 
 Go to the control panel by searching it in the windows start menu.
-![control panel](.\Docs\Images\ControlPanel.png)
+![control panel](./Docs/Images/ControlPanel.png)
 
 Search and enter the Tablet Pc Settings.
-![control panel](.\Docs\Images\ControlPanelTabletPcSettings.png)
+![control panel](./Docs/Images/ControlPanelTabletPcSettings.png)
 
 Start the setup and follow the screen instructions. Usually you press Enter to skip a non-touch screen or touch anywhere in the screen if needed.
-![control panel](.\Docs\Images\TabletPcSettings.png)
+![control panel](./Docs/Images/TabletPcSettings.png)
 
 # How to use  <a name="how-to-use"></a>  
 When you first run the script a ScreenDeck.json file will be generated and the UI will be shown.  
@@ -49,7 +49,7 @@ Also it saves its last location and size from the previous execution so it will 
 
 If this feature is giving you errors because you changed your monitor settings you can always reset its position by right clicking the ScreenDeck tray icon and selecting `Reset Window size and cords`
 
-![tray icon](.\Docs\Images\TrayIconContextMenu.png)
+![tray icon](./Docs/Images/TrayIconContextMenu.png)
 
 ## Configure GuiConfig  <a name="configure-guiconfig"></a>  
 You can add a top level object field named `GuiConfig` with any of the following examples:
